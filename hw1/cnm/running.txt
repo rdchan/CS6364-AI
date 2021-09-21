@@ -1,32 +1,317 @@
- kittycat  …  homework  hw1  cnm  python -i cannibal_missionary_search_3.py 
->>> myboat = CannibalMissionary((3, 3, 1))
->>> out = uniform_cost_search(myboat, display=True)
-14 paths have been expanded and 0 paths remain in the frontier
->>> print(out.path())
-[<Node (3, 3, 1)>, <Node (1, 3, 0)>, <Node (2, 3, 1)>, <Node (0, 3, 0)>, <Node (1, 3, 1)>, <Node (1, 1, 0)>, <Node (2, 2, 1)>, <Node (2, 0, 0)>, <Node (3, 0, 1)>, <Node (1, 0, 0)>, <Node (1
-, 1, 1)>, <Node (0, 0, 0)>]
->>> ids = iterative_deepening_search(myboat)
->>> print(ids.path())
-[<Node (3, 3, 1)>, <Node (1, 3, 0)>, <Node (2, 3, 1)>, <Node (0, 3, 0)>, <Node (1, 3, 1)>, <Node (1, 1, 0)>, <Node (2, 2, 1)>, <Node (2, 0, 0)>, <Node (3, 0, 1)>, <Node (1, 0, 0)>, <Node (1, 1, 1)>, <Node (0, 0, 0)>]
->>> gbfs = greedy_best_first_graph_search(myboat, node.depth, display=True)
-Traceback (most recent call last):
-  File "<stdin>", line 1, in <module>
-NameError: name 'node' is not defined
->>> gbfs = greedy_best_first_graph_search(myboat, lambda node: node.depth, display=True)
-14 paths have been expanded and 0 paths remain in the frontier
->>> print(gbfs.solution())
-[(-2, 0, -1), (1, 0, 1), (-2, 0, -1), (1, 0, 1), (0, -2, -1), (1, 1, 1), (0, -2, -1), (1, 0, 1), (-2, 0, -1), (0, 1, 1), (-1, -1, -1)]
->>> astar = astar_search(myboat, lambda node: node.depth, display=True)
-14 paths have been expanded and 0 paths remain in the frontier
->>> print(astar.solution())
-[(-2, 0, -1), (1, 0, 1), (-2, 0, -1), (1, 0, 1), (0, -2, -1), (1, 1, 1), (0, -2, -1), (1, 0, 1), (-2, 0, -1), (0, 1, 1), (-1, -1, -1)]
->>> print(out.solution())
-[(-2, 0, -1), (1, 0, 1), (-2, 0, -1), (1, 0, 1), (0, -2, -1), (1, 1, 1), (0, -2, -1), (1, 0, 1), (-2, 0, -1), (0, 1, 1), (-1, -1, -1)]
->>> print(ids.solution())
-[(-2, 0, -1), (1, 0, 1), (-2, 0, -1), (1, 0, 1), (0, -2, -1), (1, 1, 1), (0, -2, -1), (1, 0, 1), (-2, 0, -1), (0, 1, 1), (-1, -1, -1)]
->>> rbfs = recursive_best_first_search(myboat, lambda node: node.depth)
->>> print(rbfs.solution())
-[(-2, 0, -1), (1, 0, 1), (-2, 0, -1), (1, 0, 1), (0, -2, -1), (1, 1, 1), (0, -2, -1), (1, 0, 1), (-2, 0, -1), (0, 1, 1), (-1, -1, -1)]
->>> 
+# to run, use `python cannibal_missionary_search.py | less`
 
+here is an example output:
+***** Uniform Cost Search  *****
+At step 1
+The frontier list is
+[(1, 3, 0), (2, 3, 0), (2, 2, 0)]
+The explored set is
+{(3, 3, 1)}
+------------
+At step 2
+The frontier list is
+[(2, 2, 0), (2, 3, 0), (2, 3, 1)]
+The explored set is
+{(1, 3, 0), (3, 3, 1)}
+------------
+At step 3
+The frontier list is
+[(2, 3, 0), (2, 3, 1)]
+The explored set is
+{(1, 3, 0), (3, 3, 1), (2, 2, 0)}
+------------
+At step 4
+The frontier list is
+[(2, 3, 1)]
+The explored set is
+{(1, 3, 0), (3, 3, 1), (2, 2, 0), (2, 3, 0)}
+------------
+At step 5
+The frontier list is
+[(0, 3, 0)]
+The explored set is
+{(2, 3, 1), (3, 3, 1), (1, 3, 0), (2, 2, 0), (2, 3, 0)}
+------------
+SOLUTION:
+At state (3, 3, 1)
+  Taking action (-2, 0, -1)
 
+At state (1, 3, 0)
+  Taking action (1, 0, 1)
+
+At state (2, 3, 1)
+  Taking action (-2, 0, -1)
+
+At state (0, 3, 0)
+  Taking action (1, 0, 1)
+
+At state (1, 3, 1)
+  Taking action (0, -2, -1)
+
+At state (1, 1, 0)
+  Taking action (1, 1, 1)
+
+At state (2, 2, 1)
+  Taking action (0, -2, -1)
+
+At state (2, 0, 0)
+  Taking action (1, 0, 1)
+
+At state (3, 0, 1)
+  Taking action (-2, 0, -1)
+
+At state (1, 0, 0)
+  Taking action (0, 1, 1)
+
+At state (1, 1, 1)
+  Taking action (-1, -1, -1)
+
+At state (0, 0, 0)
+
+***** Iterative Deepening Search  *****
+At step 1
+The successors to the current node, (3, 3, 1) are:
+[(2, 3, 0), (1, 3, 0), (2, 2, 0)]
+------------
+At step 2
+The successors to the current node, (3, 3, 1) are:
+[(2, 3, 0), (1, 3, 0), (2, 2, 0)]
+------------
+At step 3
+The successors to the current node, (2, 3, 0) are:
+[(3, 3, 1)]
+------------
+At step 4
+The successors to the current node, (1, 3, 0) are:
+[(2, 3, 1), (3, 3, 1)]
+------------
+At step 5
+The successors to the current node, (2, 2, 0) are:
+[(2, 3, 1), (3, 3, 1)]
+------------
+SOLUTION:
+At state (3, 3, 1)
+  Taking action (-2, 0, -1)
+
+At state (1, 3, 0)
+  Taking action (1, 0, 1)
+
+At state (2, 3, 1)
+  Taking action (-2, 0, -1)
+
+At state (0, 3, 0)
+  Taking action (1, 0, 1)
+
+At state (1, 3, 1)
+  Taking action (0, -2, -1)
+
+At state (1, 1, 0)
+  Taking action (1, 1, 1)
+
+At state (2, 2, 1)
+  Taking action (0, -2, -1)
+
+At state (2, 0, 0)
+  Taking action (1, 0, 1)
+
+At state (3, 0, 1)
+  Taking action (-2, 0, -1)
+
+At state (1, 0, 0)
+  Taking action (0, 1, 1)
+
+At state (1, 1, 1)
+  Taking action (-1, -1, -1)
+
+At state (0, 0, 0)
+
+***** Greedy Best First Search  *****
+At step 1
+The frontier list is
+[(1, 3, 0), (2, 3, 0), (2, 2, 0)]
+The explored set is
+{(3, 3, 1)}
+------------
+At step 2
+The frontier list is
+[(2, 2, 0), (2, 3, 0), (2, 3, 1)]
+The explored set is
+{(1, 3, 0), (3, 3, 1)}
+------------
+At step 3
+The frontier list is
+[(2, 3, 0), (2, 3, 1)]
+The explored set is
+{(1, 3, 0), (3, 3, 1), (2, 2, 0)}
+------------
+At step 4
+The frontier list is
+[(2, 3, 1)]
+The explored set is
+{(1, 3, 0), (3, 3, 1), (2, 2, 0), (2, 3, 0)}
+------------
+At step 5
+The frontier list is
+[(0, 3, 0)]
+The explored set is
+{(2, 3, 1), (3, 3, 1), (1, 3, 0), (2, 2, 0), (2, 3, 0)}
+------------
+SOLUTION:
+At state (3, 3, 1)
+  Taking action (-2, 0, -1)
+
+At state (1, 3, 0)
+  Taking action (1, 0, 1)
+
+At state (2, 3, 1)
+  Taking action (-2, 0, -1)
+
+At state (0, 3, 0)
+  Taking action (1, 0, 1)
+
+At state (1, 3, 1)
+  Taking action (0, -2, -1)
+
+At state (1, 1, 0)
+  Taking action (1, 1, 1)
+
+At state (2, 2, 1)
+  Taking action (0, -2, -1)
+
+At state (2, 0, 0)
+  Taking action (1, 0, 1)
+
+At state (3, 0, 1)
+  Taking action (-2, 0, -1)
+
+At state (1, 0, 0)
+  Taking action (0, 1, 1)
+
+At state (1, 1, 1)
+  Taking action (-1, -1, -1)
+
+At state (0, 0, 0)
+
+***** A* Search  *****
+At step 1
+The frontier list is
+[(1, 3, 0), (2, 3, 0), (2, 2, 0)]
+The explored set is
+{(3, 3, 1)}
+------------
+At step 2
+The frontier list is
+[(2, 2, 0), (2, 3, 0), (2, 3, 1)]
+The explored set is
+{(1, 3, 0), (3, 3, 1)}
+------------
+At step 3
+The frontier list is
+[(2, 3, 0), (2, 3, 1)]
+The explored set is
+{(1, 3, 0), (3, 3, 1), (2, 2, 0)}
+------------
+At step 4
+The frontier list is
+[(2, 3, 1)]
+The explored set is
+{(1, 3, 0), (3, 3, 1), (2, 2, 0), (2, 3, 0)}
+------------
+At step 5
+The frontier list is
+[(0, 3, 0)]
+The explored set is
+{(2, 3, 1), (3, 3, 1), (1, 3, 0), (2, 2, 0), (2, 3, 0)}
+------------
+SOLUTION:
+At state (3, 3, 1)
+  Taking action (-2, 0, -1)
+
+At state (1, 3, 0)
+  Taking action (1, 0, 1)
+
+At state (2, 3, 1)
+  Taking action (-2, 0, -1)
+
+At state (0, 3, 0)
+  Taking action (1, 0, 1)
+
+At state (1, 3, 1)
+  Taking action (0, -2, -1)
+
+At state (1, 1, 0)
+  Taking action (1, 1, 1)
+
+At state (2, 2, 1)
+  Taking action (0, -2, -1)
+
+At state (2, 0, 0)
+  Taking action (1, 0, 1)
+
+At state (3, 0, 1)
+  Taking action (-2, 0, -1)
+
+At state (1, 0, 0)
+  Taking action (0, 1, 1)
+
+At state (1, 1, 1)
+  Taking action (-1, -1, -1)
+
+At state (0, 0, 0)
+
+***** Recursive Best First Search  *****
+At step 1
+The successors to the current node, (3, 3, 1) are:
+[(2, 3, 0), (1, 3, 0), (2, 2, 0)]
+------------
+At step 2
+The successors to the current node, (2, 3, 0) are:
+[(3, 3, 1)]
+------------
+At step 3
+The successors to the current node, (1, 3, 0) are:
+[(2, 3, 1), (3, 3, 1)]
+------------
+At step 4
+The successors to the current node, (2, 2, 0) are:
+[(2, 3, 1), (3, 3, 1)]
+------------
+At step 5
+The successors to the current node, (2, 3, 1) are:
+[(2, 2, 0), (1, 3, 0), (0, 3, 0)]
+------------
+SOLUTION:
+At state (3, 3, 1)
+  Taking action (-2, 0, -1)
+
+At state (1, 3, 0)
+  Taking action (1, 0, 1)
+
+At state (2, 3, 1)
+  Taking action (-2, 0, -1)
+
+At state (0, 3, 0)
+  Taking action (1, 0, 1)
+
+At state (1, 3, 1)
+  Taking action (0, -2, -1)
+
+At state (1, 1, 0)
+  Taking action (1, 1, 1)
+
+At state (2, 2, 1)
+  Taking action (0, -2, -1)
+
+At state (2, 0, 0)
+  Taking action (1, 0, 1)
+
+At state (3, 0, 1)
+  Taking action (-2, 0, -1)
+
+At state (1, 0, 0)
+  Taking action (0, 1, 1)
+
+At state (1, 1, 1)
+  Taking action (-1, -1, -1)
+
+At state (0, 0, 0)

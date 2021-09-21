@@ -1668,7 +1668,7 @@ def compare_graph_searchers():
                               'romania_map(Oradea, Neamt)', 'australia_map'])
 
 def banner(search_pattern):
-    print("*****", search_pattern, " *****")
+    print("\n*****", search_pattern, " *****")
     print_frontier_steps = 0
     extra_credit_banner = "The Frontier list and Explored set for" + search_pattern + "are..."
 
@@ -1700,3 +1700,5 @@ def main():
     banner("Recursive Best First Search")
     rbfs = recursive_best_first_search(myboat, lambda node: node.depth)
     pretty_print(rbfs)
+
+main()
