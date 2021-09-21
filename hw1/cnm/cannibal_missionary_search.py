@@ -12,6 +12,7 @@ from collections import deque
 from utils import *
 
 
+print_frontier_steps = 0
 class Problem:
     """The abstract class for a formal problem. You should subclass
     this and implement the methods actions and result, and possibly
@@ -270,6 +271,7 @@ def best_first_graph_search(problem, f, display=False):
     frontier = PriorityQueue('min', f)
     frontier.append(node)
     explored = set()
+    print_frontier_steps = 0
     while frontier:
         node = frontier.pop()
         if problem.goal_test(node.state):
@@ -284,6 +286,14 @@ def best_first_graph_search(problem, f, display=False):
                 if f(child) < frontier[child]:
                     del frontier[child]
                     frontier.append(child)
+        if (print_frontier_steps < 5):
+            print("At step", print_frontier_steps + 1)
+            print("The frontier list is")
+            print([node[1].state for node in frontier.heap])
+            print("The explored set is")
+            print(explored)
+            print('------------')
+            print_frontier_steps = print_frontier_steps + 1
     return None
 
 
@@ -294,8 +304,15 @@ def uniform_cost_search(problem, display=False):
 
 def depth_limited_search(problem, limit=50):
     """[Figure 3.17]"""
-
     def recursive_dls(node, problem, limit):
+        global print_frontier_steps
+        successors = node.expand(problem)
+        if (print_frontier_steps < 5):
+            print("At step", print_frontier_steps + 1)
+            print("The successors to the current node,", node.state, "are:")
+            print([node.state for node in successors])
+            print('------------')
+            print_frontier_steps = print_frontier_steps + 1
         if problem.goal_test(node.state):
             return node
         elif limit == 0:
@@ -316,6 +333,9 @@ def depth_limited_search(problem, limit=50):
 
 def iterative_deepening_search(problem):
     """[Figure 3.18]"""
+
+    global print_frontier_steps
+    print_frontier_steps = 0
     for depth in range(sys.maxsize):
         result = depth_limited_search(problem, depth)
         if result != 'cutoff':
@@ -668,13 +688,20 @@ class PlanRoute(Problem):
 def recursive_best_first_search(problem, h=None):
     """[Figure 3.26]"""
     h = memoize(h or problem.h, 'h')
+    print_frontier_steps = 0
 
-    def RBFS(problem, node, flimit):
+    def RBFS(problem, node, flimit, print_frontier_steps):
         if problem.goal_test(node.state):
-            return node, 0  # (The second value is immaterial)
+            return node, 0, print_frontier_steps  # (The second value is immaterial)
         successors = node.expand(problem)
-        if len(successors) == 0:
-            return None, np.inf
+        if (print_frontier_steps < 5):
+            print("At step", print_frontier_steps + 1)
+            print("The successors to the current node,", node.state, "are:")
+            print([node.state for node in successors])
+            print('------------')
+            print_frontier_steps = print_frontier_steps + 1
+        if (len(successors) == 0):
+            return None, np.inf, print_frontier_steps
         for s in successors:
             s.f = max(s.path_cost + h(s), node.f)
         while True:
@@ -682,18 +709,18 @@ def recursive_best_first_search(problem, h=None):
             successors.sort(key=lambda x: x.f)
             best = successors[0]
             if best.f > flimit:
-                return None, best.f
-            if len(successors) > 1:
+                return None, best.f, print_frontier_steps
+            if (len(successors) > 1):
                 alternative = successors[1].f
             else:
                 alternative = np.inf
-            result, best.f = RBFS(problem, best, min(flimit, alternative))
+            result, best.f, print_frontier_steps = RBFS(problem, best, min(flimit, alternative), print_frontier_steps)
             if result is not None:
-                return result, best.f
+                return result, best.f, print_frontier_steps
 
     node = Node(problem.initial)
     node.f = h(node)
-    result, bestf = RBFS(problem, node, np.inf)
+    result, bestf, _ = RBFS(problem, node, np.inf, print_frontier_steps)
     return result
 
 
@@ -1639,3 +1666,37 @@ def compare_graph_searchers():
                                 GraphProblem('Q', 'WA', australia_map)],
                       header=['Searcher', 'romania_map(Arad, Bucharest)',
                               'romania_map(Oradea, Neamt)', 'australia_map'])
+
+def banner(search_pattern):
+    print("*****", search_pattern, " *****")
+    print_frontier_steps = 0
+    extra_credit_banner = "The Frontier list and Explored set for" + search_pattern + "are..."
+
+def pretty_print(goal_node):
+    states = [node.state for node in goal_node.path()]
+    states = ["At state " + str(state) for state in states]
+    actions = goal_node.solution()
+    actions = ["  Taking action " + str(action) + '\n' for action in actions]
+    result = [None]*(len(states)+len(actions))
+    result[::2] = states
+    result[1::2] = actions
+    print("SOLUTION:")
+    for item in result:
+        print(item)
+def main():
+    myboat = CannibalMissionary((3, 3, 1))
+    banner("Uniform Cost Search")
+    ucs = uniform_cost_search(myboat, display=False)
+    pretty_print(ucs)
+    banner("Iterative Deepening Search")
+    ids = iterative_deepening_search(myboat)
+    pretty_print(ids)
+    banner("Greedy Best First Search")
+    gbfs = greedy_best_first_graph_search(myboat, lambda node: node.depth, display=False)
+    pretty_print(gbfs)
+    banner("A* Search")
+    astar = astar_search(myboat, lambda node: node.depth, display=False)
+    pretty_print(astar)
+    banner("Recursive Best First Search")
+    rbfs = recursive_best_first_search(myboat, lambda node: node.depth)
+    pretty_print(rbfs)
