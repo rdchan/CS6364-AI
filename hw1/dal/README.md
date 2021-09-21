@@ -1,4 +1,4 @@
-# to run, use `python seattle_dallas_search.py`
+to run, use `python seattle_dallas_search.py`
 
 here is an example output:
 ```

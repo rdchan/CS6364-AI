@@ -1,6 +1,7 @@
-# to run, use `python cannibal_missionary_search.py | less`
+to run, use `python cannibal_missionary_search.py | less`
 
 here is an example output:
+```
 ***** Uniform Cost Search  *****
 At step 1
 The frontier list is
@@ -315,3 +316,4 @@ At state (1, 1, 1)
   Taking action (-1, -1, -1)
 
 At state (0, 0, 0)
+```
