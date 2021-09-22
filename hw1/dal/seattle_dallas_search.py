@@ -274,6 +274,7 @@ def best_first_graph_search(problem, f, display=False):
         node = frontier.pop()
         if problem.goal_test(node.state):
             if display:
+                print("[Current node:", node, "; Evaluation function (current node) =", f(node), "; Explored Cities: ", explored, "; Frontier:", [(n[1], n[0]) for n in frontier.heap], ";]\n")
                 print(len(explored), "paths have been expanded and", len(frontier), "paths remain in the frontier")
             return node
         explored.add(node.state)
@@ -284,6 +285,7 @@ def best_first_graph_search(problem, f, display=False):
                 if f(child) < frontier[child]:
                     del frontier[child]
                     frontier.append(child)
+        print("[Current node:", node, "; Evaluation function (current node) =", f(node), "; Explored Cities: ", explored, "; Frontier:", [(n[1], n[0]) for n in frontier.heap], ";]\n")
     return None
 
 
@@ -613,6 +615,13 @@ def recursive_best_first_search(problem, h=None):
             return None, np.inf
         for s in successors:
             s.f = max(s.path_cost + h(s), node.f)
+        successors.sort(key=lambda x: x.f)
+        print("Currently at node:", node)
+        if (len(successors) > 1):
+            alt = successors[1].f
+        else:
+            alt = np.inf
+        print("\tThe f_limit is", flimit, "\n\tthe best is", successors[0].f, "\n\tthe alternative is", alt, "\n\tthe current city is", node.state, "\n\tthe next city is", successors[0])
         while True:
             # Order by lowest f value
             successors.sort(key=lambda x: x.f)
@@ -1121,7 +1130,7 @@ romania_map.locations = dict(
     Vaslui=(509, 444), Zerind=(108, 531))
 
 united_states_map = UndirectedGraph(dict(
-    LosAngeles=dict(SanFrancisco=383,Austin=1377,Bakersvill=153),
+    LosAngeles=dict(SanFrancisco=383,Austin=1377,Bakersville=153),
     SanFrancisco=dict(Bakersville=283,Seattle=807),
     Seattle=dict(SantaFe=1463,Chicago=2064),
     Bakersville=dict(SantaFe=864),
@@ -1133,6 +1142,12 @@ united_states_map = UndirectedGraph(dict(
     Boston=dict(Chicago=983,SanFrancisco=3095,Austin =1963),
     Chicago=dict(SantaFe=1272),
 ))
+
+united_states_map.locations = dict(
+    Austin=(0, 182), Charlotte=(0, 929), SanFrancisco=(0, 1230),
+    LosAngeles=(0, 1100), NewYork=(0, 1368), Chicago=(0,800),
+    Seattle=(0, 1670), SantaFe=(0, 560), Bakersville=(0, 1282),
+    Boston=(0, 1551), Dallas=(0, 0))
 
 """ [Figure 4.9]
 Eight possible states of the vacumm world
@@ -1590,8 +1605,51 @@ def compare_graph_searchers():
                       header=['Searcher', 'romania_map(Arad, Bucharest)',
                               'romania_map(Oradea, Neamt)', 'australia_map'])
 
+def BFS_heuristic_check(problem):
+    """[Figure 3.11]
+    Note that this function can be implemented in a
+    single line as below:
+    return graph_search(problem, FIFOQueue())
+    """
+    node = Node(problem.initial)
+    if problem.goal_test(node.state):
+        return True
+    frontier = deque([node])
+    explored = set()
+    while frontier:
+        node = frontier.popleft()
+        explored.add(node.state)
+        for child in node.expand(problem):
+            if child.state not in explored and child not in frontier:
+                if problem.goal_test(child.state):
+                    return True
+                frontier.append(child)
+                if ((node.path_cost + problem.h(node)) > (child.path_cost + problem.h(child))):
+                    print("INCONSISTENCY AT NODE", node)
+                    return False
+    return None
+
 def main():
-    # mymap = GraphProblem('Seattle', 'Dallas', united_states_map)
-    compare_searchers(problems=[GraphProblem('Seattle', 'Dallas', united_states_map)],
-                      header=['Searcher', 'united_states_map(Seattle, Dallas)'])
+    mymap = GraphProblem('Seattle', 'Dallas', united_states_map)
+    recursive_best_first_search(mymap)
+    final = astar_search(mymap, display=True)
+    # consistent = True
+    # for node in final.path():
+    #     if node.parent:
+    #         print("this node:", node, "has f", node.f, "and node.p is", node.parent, "which has node.p.f is", node.parent.f)
+    #         if node.f < node.parent.f:
+    #             # it's bad
+    #             print("The heuristic not consistent")
+    #             consistent = False
+
+
+    consistent = True
+    for node in (united_states_map.nodes()):
+        consistent = consistent and BFS_heuristic_check(GraphProblem(node, 'Dallas', united_states_map))
+    print("The heuristic is consistent? =>", consistent)
+
+
+
+
+
 main()
