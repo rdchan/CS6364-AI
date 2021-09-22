@@ -289,7 +289,9 @@ def best_first_graph_search(problem, f, display=False):
         if (print_frontier_steps < 5):
             print("At step", print_frontier_steps + 1)
             print("The frontier list is")
-            print([node[1].state for node in frontier.heap])
+            sorted_frontier = frontier.heap
+            sorted_frontier.sort(key=lambda x: x[0])
+            print([node[1].state for node in sorted_frontier])
             print("The explored set is")
             print(explored)
             print('------------')
@@ -302,16 +304,29 @@ def uniform_cost_search(problem, display=False):
     return best_first_graph_search(problem, lambda node: node.path_cost, display)
 
 
+explored_extra_credit = set()
+frontier_extra_credit = set()
+
 def depth_limited_search(problem, limit=50):
     """[Figure 3.17]"""
     def recursive_dls(node, problem, limit):
         global print_frontier_steps
+        global explored_extra_credit
+        global frontier_extra_credit
+        explored_extra_credit.add(node)
         successors = node.expand(problem)
+        for s in successors:
+            frontier_extra_credit.add(s)
+        for i in explored_extra_credit:
+            if i in frontier_extra_credit:
+                frontier_extra_credit.remove(i)
         if (print_frontier_steps < 5):
             print("At step", print_frontier_steps + 1)
-            print("The successors to the current node,", node.state, "are:")
-            print([node.state for node in successors])
-            print('------------')
+            print("\tThe frontier list is")
+            print("\t",[x.state for x in frontier_extra_credit])
+            print("\tThe explored set is")
+            print("\t",[x.state for x in explored_extra_credit])
+            print("----------------")
             print_frontier_steps = print_frontier_steps + 1
         if problem.goal_test(node.state):
             return node
@@ -688,20 +703,37 @@ class PlanRoute(Problem):
 def recursive_best_first_search(problem, h=None):
     """[Figure 3.26]"""
     h = memoize(h or problem.h, 'h')
-    print_frontier_steps = 0
 
-    def RBFS(problem, node, flimit, print_frontier_steps):
+    global explored_extra_credit
+    global frontier_extra_credit
+    global print_frontier_steps
+    explored_extra_credit = set()
+    frontier_extra_credit = set()
+    print_frontier_steps = 0
+    def RBFS(problem, node, flimit):
+        global explored_extra_credit
+        global frontier_extra_credit
+        global print_frontier_steps
+        explored_extra_credit.add(node)
         if problem.goal_test(node.state):
-            return node, 0, print_frontier_steps  # (The second value is immaterial)
+            return node, 0 # (The second value is immaterial)
+
         successors = node.expand(problem)
+        for s in successors:
+            frontier_extra_credit.add(s)
+        for i in explored_extra_credit:
+            if i in frontier_extra_credit:
+                frontier_extra_credit.remove(i)
         if (print_frontier_steps < 5):
             print("At step", print_frontier_steps + 1)
-            print("The successors to the current node,", node.state, "are:")
-            print([node.state for node in successors])
-            print('------------')
+            print("\tThe frontier list is")
+            print("\t",[x.state for x in frontier_extra_credit])
+            print("\tThe explored set is")
+            print("\t",[x.state for x in explored_extra_credit])
+            print("----------------")
             print_frontier_steps = print_frontier_steps + 1
         if (len(successors) == 0):
-            return None, np.inf, print_frontier_steps
+            return None, np.inf
         for s in successors:
             s.f = max(s.path_cost + h(s), node.f)
         while True:
@@ -709,18 +741,18 @@ def recursive_best_first_search(problem, h=None):
             successors.sort(key=lambda x: x.f)
             best = successors[0]
             if best.f > flimit:
-                return None, best.f, print_frontier_steps
+                return None, best.f
             if (len(successors) > 1):
                 alternative = successors[1].f
             else:
                 alternative = np.inf
-            result, best.f, print_frontier_steps = RBFS(problem, best, min(flimit, alternative), print_frontier_steps)
+            result, best.f = RBFS(problem, best, min(flimit, alternative))
             if result is not None:
-                return result, best.f, print_frontier_steps
+                return result, best.f
 
     node = Node(problem.initial)
     node.f = h(node)
-    result, bestf, _ = RBFS(problem, node, np.inf, print_frontier_steps)
+    result, bestf = RBFS(problem, node, np.inf)
     return result
 
 

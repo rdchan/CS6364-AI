@@ -285,7 +285,15 @@ def best_first_graph_search(problem, f, display=False):
                 if f(child) < frontier[child]:
                     del frontier[child]
                     frontier.append(child)
-        print("[Current node:", node, "; Evaluation function (current node) =", f(node), "; Explored Cities: ", explored, "; Frontier:", [(n[1], n[0]) for n in frontier.heap], ";]\n")
+
+        temp = frontier.heap
+        temp.sort(key=lambda x: x[0])
+        print("[Current node:", node, "; Evaluation function (current node) =", f(node), "; Explored Cities: ", explored, "; Frontier:", [(n[1], n[0]) for n in temp], ";]\n")
+        # print("========debug style========")
+        # print("the raw heap is",frontier.heap)
+        # # for item in temp:
+        # #     print(item)
+        # print("temp is", temp)
     return None
 
 
@@ -615,16 +623,19 @@ def recursive_best_first_search(problem, h=None):
             return None, np.inf
         for s in successors:
             s.f = max(s.path_cost + h(s), node.f)
-        successors.sort(key=lambda x: x.f)
-        print("Currently at node:", node)
-        if (len(successors) > 1):
-            alt = successors[1].f
-        else:
-            alt = np.inf
-        print("\tThe f_limit is", flimit, "\n\tthe best is", successors[0].f, "\n\tthe alternative is", alt, "\n\tthe current city is", node.state, "\n\tthe next city is", successors[0])
         while True:
             # Order by lowest f value
             successors.sort(key=lambda x: x.f)
+            if (len(successors) > 1):
+                alt = successors[1].f
+            else:
+                alt = np.inf
+            print("The current node is", node)
+            print("\tThe f_limit is", flimit,
+                  "\n\tthe best is", successors[0].f,
+                  "\n\tthe alternative is", alt,
+                  "\n\tthe current city is", node.state,
+                  "\n\tthe next city is", successors[0], "\n")
             best = successors[0]
             if best.f > flimit:
                 return None, best.f
@@ -1624,32 +1635,28 @@ def BFS_heuristic_check(problem):
                 if problem.goal_test(child.state):
                     return True
                 frontier.append(child)
-                if ((node.path_cost + problem.h(node)) > (child.path_cost + problem.h(child))):
+
+                # figure out path of all parent nodes
+                parent = node
+                path_cost_accumulate = 0
+                while parent:
+                    path_cost_accumulate = parent.path_cost + path_cost_accumulate
+                    parent = parent.parent
+
+                # check if the child whole heuristic is less than its parent whole heuristic
+                if ((path_cost_accumulate + problem.h(node)) > (path_cost_accumulate + child.path_cost + problem.h(child))):
                     print("INCONSISTENCY AT NODE", node)
                     return False
     return None
 
 def main():
     mymap = GraphProblem('Seattle', 'Dallas', united_states_map)
+    print("**** RBFS ****")
     recursive_best_first_search(mymap)
+    print("**** A STAR SEARCH ****")
     final = astar_search(mymap, display=True)
-    # consistent = True
-    # for node in final.path():
-    #     if node.parent:
-    #         print("this node:", node, "has f", node.f, "and node.p is", node.parent, "which has node.p.f is", node.parent.f)
-    #         if node.f < node.parent.f:
-    #             # it's bad
-    #             print("The heuristic not consistent")
-    #             consistent = False
-
-
     consistent = True
     for node in (united_states_map.nodes()):
         consistent = consistent and BFS_heuristic_check(GraphProblem(node, 'Dallas', united_states_map))
     print("The heuristic is consistent? =>", consistent)
-
-
-
-
-
 main()
