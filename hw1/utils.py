@@ -2,16 +2,13 @@
 
 import bisect
 import collections
-import collections.abc
 import functools
 import heapq
 import operator
 import os.path
 import random
+import math
 from itertools import chain, combinations
-from statistics import mean
-
-import numpy as np
 
 
 # ______________________________________________________________________________
@@ -90,9 +87,9 @@ def power_set(iterable):
     return list(chain.from_iterable(combinations(s, r) for r in range(len(s) + 1)))[1:]
 
 
-def extend(s, var, val):
-    """Copy dict s and extend it by setting var to val; return copy."""
-    return {**s, var: val}
+# def extend(s, var, val):
+#     """Copy dict s and extend it by setting var to val; return copy."""
+#     return {**s, var: val}
 
 
 def flatten(seqs):
@@ -148,30 +145,9 @@ def dot_product(x, y):
     return sum(_x * _y for _x, _y in zip(x, y))
 
 
-def element_wise_product(x, y):
-    """Return vector as an element-wise product of vectors x and y."""
-    assert len(x) == len(y)
-    return np.multiply(x, y)
-
-
-def matrix_multiplication(x, *y):
-    """Return a matrix as a matrix-multiplication of x and arbitrary number of matrices *y."""
-
-    result = x
-    for _y in y:
-        result = np.matmul(result, _y)
-
-    return result
-
-
 def vector_add(a, b):
     """Component-wise addition of two vectors."""
     return tuple(map(operator.add, a, b))
-
-
-def scalar_vector_product(x, y):
-    """Return vector as a product of a scalar and a vector"""
-    return np.multiply(x, y)
 
 
 def probability(p):
@@ -228,9 +204,6 @@ def num_or_str(x):  # TODO: rename as `atom`
             return str(x).strip()
 
 
-def euclidean_distance(x, y):
-    return np.sqrt(sum((_x - _y) ** 2 for _x, _y in zip(x, y)))
-
 
 def manhattan_distance(x, y):
     return sum(abs(_x - _y) for _x, _y in zip(x, y))
@@ -240,16 +213,9 @@ def hamming_distance(x, y):
     return sum(_x != _y for _x, _y in zip(x, y))
 
 
-def cross_entropy_loss(x, y):
-    return (-1.0 / len(x)) * sum(_x * np.log(_y) + (1 - _x) * np.log(1 - _y) for _x, _y in zip(x, y))
-
 
 def mean_squared_error_loss(x, y):
     return (1.0 / len(x)) * sum((_x - _y) ** 2 for _x, _y in zip(x, y))
-
-
-def rms_error(x, y):
-    return np.sqrt(ms_error(x, y))
 
 
 def ms_error(x, y):
@@ -263,6 +229,14 @@ def mean_error(x, y):
 def mean_boolean_error(x, y):
     return mean(_x != _y for _x, _y in zip(x, y))
 
+def euclidean_distance(x, y):
+        return math.sqrt(sum((_x - _y) ** 2 for _x, _y in zip(x, y)))
+
+def distance(a, b):
+    """The distance between two (x, y) points."""""
+    xA, yA = a
+    xB, yB = b
+    return math.hypot((xA - xB), (yA - yB))
 
 def normalize(dist):
     """Multiply each number by a constant such that the sum is 1.0"""
@@ -280,26 +254,8 @@ def random_weights(min_value, max_value, num_weights):
     return [random.uniform(min_value, max_value) for _ in range(num_weights)]
 
 
-def sigmoid(x):
-    """Return activation value of x with sigmoid function."""
-    return 1 / (1 + np.exp(-x))
-
-
 def sigmoid_derivative(value):
     return value * (1 - value)
-
-
-def elu(x, alpha=0.01):
-    return x if x > 0 else alpha * (np.exp(x) - 1)
-
-
-def elu_derivative(value, alpha=0.01):
-    return 1 if value > 0 else alpha * np.exp(value)
-
-
-def tanh(x):
-    return np.tanh(x)
-
 
 def tanh_derivative(value):
     return 1 - (value ** 2)
@@ -325,34 +281,6 @@ def step(x):
     """Return activation value of x with sign function"""
     return 1 if x >= 0 else 0
 
-
-def gaussian(mean, st_dev, x):
-    """Given the mean and standard deviation of a distribution, it returns the probability of x."""
-    return 1 / (np.sqrt(2 * np.pi) * st_dev) * np.e ** (-0.5 * (float(x - mean) / st_dev) ** 2)
-
-
-def linear_kernel(x, y=None):
-    if y is None:
-        y = x
-    return np.dot(x, y.T)
-
-
-def polynomial_kernel(x, y=None, degree=2.0):
-    if y is None:
-        y = x
-    return (1.0 + np.dot(x, y.T)) ** degree
-
-
-def rbf_kernel(x, y=None, gamma=None):
-    """Radial-basis function kernel (aka squared-exponential kernel)."""
-    if y is None:
-        y = x
-    if gamma is None:
-        gamma = 1.0 / x.shape[1]  # 1.0 / n_features
-    return np.exp(-gamma * (-2.0 * np.dot(x, y.T) +
-                            np.sum(x * x, axis=1).reshape((-1, 1)) + np.sum(y * y, axis=1).reshape((1, -1))))
-
-
 # ______________________________________________________________________________
 # Grid Functions
 
@@ -371,14 +299,6 @@ def turn_right(heading):
 
 def turn_left(heading):
     return turn_heading(heading, LEFT)
-
-
-def distance(a, b):
-    """The distance between two (x, y) points."""
-    xA, yA = a
-    xB, yB = b
-    return np.hypot((xA - xB), (yA - yB))
-
 
 def distance_squared(a, b):
     """The square of the distance between two (x, y) points."""
@@ -636,14 +556,6 @@ def Symbol(name):
 def symbols(names):
     """Return a tuple of Symbols; names is a comma/whitespace delimited str."""
     return tuple(Symbol(name) for name in names.replace(',', ' ').split())
-
-
-def subexpressions(x):
-    """Yield the subexpressions of an Expression (including x itself)."""
-    yield x
-    if isinstance(x, Expr):
-        for arg in x.args:
-            yield from subexpressions(arg)
 
 
 def arity(expression):

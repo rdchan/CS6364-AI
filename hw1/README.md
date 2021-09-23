@@ -23,7 +23,7 @@ Additionally, I've written a function `BFS_heuristic_check` that iterates throug
 For the programming assignments in problem 2, run the Cannibal and Missionaries problem.
 
 To run the Cannibal and Missionaries problem, do:
-`python cannibal_missionary_search.py`
+`python3 cannibal_missionary_search.py`
 It will run all 5 searches in the following order:
 
     - Uniform Cost Search
@@ -40,6 +40,6 @@ Following this initial print, the entire solution will be printed, all states an
 For problems 3.1 and 3.4, as well as the 3.4 extra credit, run the Seattle to Dallas search problem script.
 
 To run the Seattle to Dallas search problem, do:
-`python seattle_dallas_search.py`
+`python3 seattle_dallas_search.py`
 It will run the Recursive Best First Search algorithm, followed by the A* search algorithm.
 Consistent with the Extra Credit for part 4, it will check if the heuristic provided in the problem is consistent with the road graph. 

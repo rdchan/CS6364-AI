@@ -7,6 +7,7 @@ functions.
 """
 
 import sys
+import math
 from collections import deque
 
 from utils import *
@@ -420,7 +421,7 @@ def recursive_best_first_search(problem, h=None):
             print("----------------")
             print_frontier_steps = print_frontier_steps + 1
         if (len(successors) == 0):
-            return None, np.inf
+            return None, math.inf
         for s in successors:
             s.f = max(s.path_cost + h(s), node.f)
         while True:
@@ -432,14 +433,14 @@ def recursive_best_first_search(problem, h=None):
             if (len(successors) > 1):
                 alternative = successors[1].f
             else:
-                alternative = np.inf
+                alternative = math.inf
             result, best.f = RBFS(problem, best, min(flimit, alternative))
             if result is not None:
                 return result, best.f
 
     node = Node(problem.initial)
     node.f = h(node)
-    result, bestf = RBFS(problem, node, np.inf)
+    result, bestf = RBFS(problem, node, math.inf)
     return result
 
 
@@ -528,11 +529,11 @@ class GraphProblem(Problem):
         return action
 
     def path_cost(self, cost_so_far, A, action, B):
-        return cost_so_far + (self.graph.get(A, B) or np.inf)
+        return cost_so_far + (self.graph.get(A, B) or math.inf)
 
     def find_min_edge(self):
         """Find minimum value of edges."""
-        m = np.inf
+        m = math.inf
         for d in self.graph.graph_dict.values():
             local_min = min(d.values())
             m = min(m, local_min)
@@ -548,7 +549,7 @@ class GraphProblem(Problem):
 
             return int(distance(locs[node.state], locs[self.goal]))
         else:
-            return np.inf
+            return math.inf
 
 
 # Code to compare searchers on various problems.
